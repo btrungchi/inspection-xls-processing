@@ -1,0 +1,7 @@
+.vscode/
+.ipynb_checkpoints/
+misc/
+web/logs/*
+web/mainapp/__pycache__/*
+web/web/__pycache__/*
+web/mainapp/migrations/__pycache__/*

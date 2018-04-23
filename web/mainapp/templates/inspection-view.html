@@ -1,0 +1,71 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+<body>
+    <form id="upload_form" method="post" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" size="10" />
+        <input id="uploadbutton" type="button" value="Upload" />
+    </form>
+    <div id="status_text"></div>
+
+    <form action="/drop-all" method="post" style="float: right;">
+        {% csrf_token %}
+        <button id="drop_table_button" name="action" value="drop-all">Drop all tables</button>
+    </form>
+
+    <select class="table_selection">
+        <option value="/?table=General Information">General Information</option>
+        <option value="/?table=SIP Elements">SIP Elements</option>
+        <option value="/?table=PIF Info">PIF Info</option>
+        <option value="/?table=Item Info">Item Info</option>
+        <option value="/?table=POM Info" selected>POM Info</option>
+    </select>
+
+    {{ datatable| safe }}
+
+
+    <script>
+        $(document).ready(function () {
+            if ($(".inspection-data-table").length == 0) {
+                $('.table_selection').hide();
+                $('#drop_table_button').hide();
+            } else {
+                var url = new URL(document.location);
+                var table_name = url.searchParams.get("table");
+                table_name = (table_name == null ? "General Information" : table_name);
+                $(".table_selection").val("/?table=" + table_name);
+                $('.table_selection').on('change', function () {
+                    window.location = $(this).val();
+                });
+            }
+
+            $("#uploadbutton").click(function () {
+                var filename = $('#fileInput').val().replace(/.*[\/\\]/, '');
+                $.ajax({
+                    type: "POST",
+                    headers: { 'X-CSRFToken': $.cookie('csrftoken') },
+                    url: "",
+                    enctype: 'multipart/form-data',
+                    data: new FormData($('#upload_form')[0]),
+                    contentType: false,
+                    processData: false,
+                    success: function () {
+                        location.reload();
+                    },
+                    error: function (data) {
+                        $("#status_text").text('Processing ' + filename + ' failed: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
